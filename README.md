@@ -4,6 +4,10 @@ Provenance Guard is a Flask backend system for creative platforms that evaluates
 
 The system is designed for poems, short story excerpts, blog posts, and other creative writing submissions. It provides a transparency label, confidence score, audit log, and creator appeal flow.
 
+## Demo Video
+
+Demo video: https://drive.google.com/file/d/1q7TnuGLq6_BTD0xphAhpiUWxWauOyKVH/view?usp=sharing
+
 ## Project Goal
 
 Creative platforms need a way to provide transparency around AI-generated content without unfairly punishing human writers. Automated AI detectors are imperfect, so Provenance Guard uses multiple signals, cautious thresholds, explainable labels, and an appeal process.
