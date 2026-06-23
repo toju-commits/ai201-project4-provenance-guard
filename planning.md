@@ -114,3 +114,105 @@ Each appeal log entry will include:
 ## Limitations
 
 AI text detection is not perfectly reliable. The system should be treated as a transparency aid, not a final judgment. Human review remains important, especially for appeals and borderline cases.
+
+## Anticipated Edge Cases
+
+### Edge Case 1: Very Short Submissions
+
+A very short poem, quote, or paragraph may not provide enough text for reliable stylometric analysis. Sentence variance, type-token ratio, and punctuation density can become unstable when the text is only one or two sentences.
+
+Planned response:
+- Still return a result, but avoid overconfident classification.
+- Allow the combined score to fall into the uncertain range when signals are weak.
+- Make the appeal process available for creators who believe the label is wrong.
+
+### Edge Case 2: Human Writing That Looks Polished or Formulaic
+
+Some human writers use polished academic or formal language. This can resemble AI-generated text because it may have balanced sentence lengths, clean punctuation, and common transition phrases.
+
+Planned response:
+- Use a high threshold for `likely_ai`.
+- Use `uncertain` for mixed cases instead of aggressively labeling them as AI.
+- Provide a plain-language label that says creators may appeal.
+
+### Edge Case 3: Experimental Writing, Poetry, or Lyrics
+
+Creative writing can intentionally break normal grammar and structure. Poetry or lyrics may use repetition, fragments, and unusual punctuation. These patterns could confuse stylometric signals.
+
+Planned response:
+- Treat stylometric results as only one part of the final score.
+- Keep the LLM and stylometric scores visible separately.
+- Use human review through the appeal workflow for disputed cases.
+
+## AI Tool Plan
+
+AI tools will be used during implementation, especially for Milestone 3 and Milestone 4.
+
+### Milestone 3: Build /submit and First Detection Signal
+
+Input provided to AI tool:
+- Project requirement for `POST /submit`
+- Required JSON fields: `text` and `creator_id`
+- Required response fields: `content_id`, attribution result, confidence score, and transparency label
+- Planned architecture from this document
+
+Expected AI output:
+- Flask route for `/submit`
+- Basic detector function
+- Structured JSON response format
+
+Human review:
+- Verify route behavior manually using PowerShell requests
+- Check that missing fields return useful errors
+- Ensure output matches rubric expectations
+
+### Milestone 4: Add Second Signal and Confidence Scoring
+
+Input provided to AI tool:
+- Detection pipeline plan
+- Signal descriptions
+- Formula: `combined_ai_score = 0.65 * llm_ai_score + 0.35 * stylometric_ai_score`
+- Thresholds for `likely_ai`, `uncertain`, and `likely_human`
+
+Expected AI output:
+- Stylometric analysis module
+- Combined scoring function
+- Individual signal score output
+
+Human review:
+- Confirm that both signals appear in the API response
+- Test multiple inputs to make sure confidence scores differ
+- Adjust thresholds to reduce harmful false positives
+
+### Architecture Diagram
+
+```txt
+Client
+  |
+  v
+POST /submit
+  |
+  v
+Detector Pipeline
+  |--------------------------|
+  v                          v
+LLM Classifier Signal     Stylometric Signal
+  |                          |
+  |                          v
+  |                  Text statistics:
+  |                  - sentence length variance
+  |                  - type-token ratio
+  |                  - punctuation density
+  |                  - average sentence length
+  |                          |
+  |--------------------------|
+              |
+              v
+Combined Confidence Score
+              |
+              v
+Attribution Result + Transparency Label
+              |
+              v
+Structured Audit Log
+```
